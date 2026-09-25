@@ -204,7 +204,7 @@
       font-weight: bold;
       white-space: nowrap;
       pointer-events: none;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
       z-index: 10;
       display: none;
     }
@@ -229,36 +229,40 @@
       display: none !important;
     }
 
-    /* 한글 해석 */
-    .translation-area {
-      border-top: 1px solid #e2dbcd;
-      padding-top: 1.25rem;
-      margin-top: 0.25rem;
+    /* ==============================
+       한국어 해석
+    ============================== */
+
+    .translation-box {
+      margin-top: 1.5rem;
+      padding: 1rem 1.1rem;
+      border-radius: 0.9rem;
+      background: #f1f7f5;
+      border: 1px solid #d4e7e1;
+      line-height: 1.9;
     }
 
-    .translation-label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
+    .translation-title {
+      margin-bottom: 0.45rem;
+      font-size: 0.9rem;
+      font-weight: 800;
       color: var(--teal);
     }
 
     .translation-text {
-      display: block;
-      color: var(--muted);
-      font-size: 0.98rem;
-      line-height: 2;
+      color: #39474e;
       white-space: pre-wrap;
+      word-break: keep-all;
     }
 
     .translation-loading {
-      color: #8a9398;
+      color: #66717a;
+      font-size: 0.9rem;
     }
 
     .translation-error {
       color: #a74131;
+      font-size: 0.9rem;
     }
 
     @keyframes nudge {
@@ -329,7 +333,6 @@
         </p>
       </header>
 
-
       <!-- LANGUAGE -->
       <section
         class="paper-panel bg-[#fffcf4] p-5 sm:p-6"
@@ -367,7 +370,6 @@
 
         </div>
       </section>
-
 
       <!-- SOURCE -->
       <section
@@ -424,7 +426,6 @@
 
         </div>
       </section>
-
 
       <!-- LEVEL -->
       <section
@@ -497,7 +498,6 @@
         </div>
       </section>
 
-
       <!-- EMPTY -->
       <section
         id="empty-view"
@@ -507,7 +507,6 @@
           위 상자에 본문을 입력하세요
         </h2>
       </section>
-
 
       <!-- QUIZ -->
       <section
@@ -547,19 +546,26 @@
 
         </div>
 
-        <!-- 빈칸 문제 -->
         <div
           id="quiz-content"
           class="quiz-copy py-6"
           aria-live="polite"
         ></div>
 
-        <!-- 영어 한글 해석 -->
+        <!-- 한국어 해석 -->
         <div
-          id="translation-content"
-          class="translation-area"
-          aria-live="polite"
-        ></div>
+          id="translation-box"
+          class="translation-box hidden-view"
+        >
+          <div class="translation-title">
+            🇰🇷 한국어 해석
+          </div>
+
+          <div
+            id="translation-text"
+            class="translation-text"
+          ></div>
+        </div>
 
         <div
           class="flex flex-col-reverse gap-3 border-t border-[#e2dbcd] pt-4 sm:flex-row sm:items-center sm:justify-between"
@@ -607,7 +613,6 @@
     </main>
   </div>
 
-
   <script>
 
     /* ==============================
@@ -620,9 +625,7 @@
       3: 0.7
     };
 
-
     /* 영어 문법 후보 */
-
     const grammarWords = new Set([
       "a", "an", "the",
       "in", "on", "at",
@@ -651,9 +654,7 @@
       "did"
     ]);
 
-
     /* 한국어 조사 */
-
     const koreanParticles = [
       "은",
       "는",
@@ -687,13 +688,11 @@
       "의"
     ];
 
-
     let selectedLevel = 0;
     let selectedLanguage = "en";
 
     let currentAnswers = [];
     let sourceText = "";
-
 
     /* ==============================
        DOM
@@ -704,9 +703,6 @@
 
     const quizContent =
       document.getElementById("quiz-content");
-
-    const translationContent =
-      document.getElementById("translation-content");
 
     const quizView =
       document.getElementById("quiz-view");
@@ -735,6 +731,11 @@
     const sourceLabel =
       document.getElementById("source-label");
 
+    const translationBox =
+      document.getElementById("translation-box");
+
+    const translationText =
+      document.getElementById("translation-text");
 
     /* ==============================
        단어 정규화
@@ -755,14 +756,11 @@
 
     }
 
-
     /* ==============================
        토큰 분리
     ============================== */
 
     function getWordTokens(text) {
-
-      /* 한국어 */
 
       if (selectedLanguage === "ko") {
 
@@ -779,9 +777,6 @@
 
       }
 
-
-      /* 영어 */
-
       const tokens =
         text.match(
           /[A-Za-z]+(?:'[A-Za-z]+)?|[^A-Za-z]+/g
@@ -797,7 +792,6 @@
 
     }
 
-
     /* ==============================
        랜덤 섞기
     ============================== */
@@ -809,7 +803,6 @@
 
     }
 
-
     /* ==============================
        0단계 후보
     ============================== */
@@ -818,8 +811,6 @@
       token,
       tokens
     ) {
-
-      /* 한국어 */
 
       if (selectedLanguage === "ko") {
 
@@ -835,9 +826,6 @@
         ) || word.length <= 2;
 
       }
-
-
-      /* 영어 */
 
       const word =
         normalizeWord(token.value);
@@ -868,7 +856,6 @@
 
     }
 
-
     /* ==============================
        빈칸 위치 선택
     ============================== */
@@ -889,9 +876,6 @@
             token => token.index
           );
 
-
-      /* 0단계 */
-
       if (level === 0) {
 
         const grammarCandidates =
@@ -908,7 +892,6 @@
               token => token.index
             );
 
-
         const chosen =
           grammarCandidates.length
             ? grammarCandidates
@@ -924,13 +907,9 @@
                   )
                 );
 
-
         return new Set(chosen);
 
       }
-
-
-      /* 1~3단계 */
 
       const count =
         Math.max(
@@ -941,14 +920,12 @@
           )
         );
 
-
       return new Set(
         shuffle(wordCandidates)
           .slice(0, count)
       );
 
     }
-
 
     /* ==============================
        정답 확인
@@ -972,22 +949,18 @@
         "is-wrong"
       );
 
-
       if (!typedValue) {
         return false;
       }
 
-
       const isCorrect =
         typedValue === answer.normalized;
-
 
       input.classList.add(
         isCorrect
           ? "is-correct"
           : "is-wrong"
       );
-
 
       if (
         shouldNudge &&
@@ -1006,11 +979,9 @@
 
       }
 
-
       return isCorrect;
 
     }
-
 
     /* ==============================
        결과 메시지
@@ -1025,7 +996,6 @@
           )
         ];
 
-
       const correctCount =
         inputs.filter(
           input =>
@@ -1034,7 +1004,6 @@
               false
             )
         ).length;
-
 
       if (
         correctCount ===
@@ -1054,7 +1023,6 @@
 
     }
 
-
     /* ==============================
        다음 빈칸
     ============================== */
@@ -1070,14 +1038,11 @@
           )
         ];
 
-
       const currentIndex =
         inputs.indexOf(currentInput);
 
-
       const nextInput =
         inputs[currentIndex + 1];
-
 
       if (nextInput) {
 
@@ -1092,83 +1057,70 @@
 
     }
 
-
     /* ==============================
-       영어 → 한글 해석
+       번역 API
+       MyMemory 무료 번역 API
     ============================== */
 
-    async function translateEnglishToKorean(text) {
+    async function translateToKorean(text) {
 
-      if (selectedLanguage !== "en") {
-        translationContent.innerHTML = "";
-        return;
-      }
+      translationBox.classList.remove(
+        "hidden-view"
+      );
 
-
-      translationContent.innerHTML = `
-        <span class="translation-label">
-          KOREAN TRANSLATION
-        </span>
-
-        <span class="translation-text translation-loading">
-          해석을 불러오는 중...
-        </span>
-      `;
-
+      translationText.innerHTML =
+        `<span class="translation-loading">
+          🔄 한국어 해석을 불러오는 중...
+        </span>`;
 
       try {
 
-        const response =
-          await fetch(
-            "https://api.mymemory.translated.net/get?langpair=en|ko&q=" +
-            encodeURIComponent(text)
-          );
+        /*
+         * MyMemory는 별도 API 키 없이
+         * 간단한 번역 요청을 보낼 수 있습니다.
+         */
 
+        const url =
+          "https://api.mymemory.translated.net/get" +
+          "?q=" +
+          encodeURIComponent(text) +
+          "&langpair=en|ko";
+
+        const response =
+          await fetch(url);
 
         if (!response.ok) {
-          throw new Error("번역 요청 실패");
+          throw new Error("Translation request failed");
         }
-
 
         const data =
           await response.json();
 
-
         const translated =
           data?.responseData?.translatedText;
 
-
         if (!translated) {
-          throw new Error("번역 결과 없음");
+          throw new Error("No translation");
         }
 
-
-        translationContent.innerHTML = `
-          <span class="translation-label">
-            KOREAN TRANSLATION
-          </span>
-
-          <span class="translation-text">
-            ${translated}
-          </span>
-        `;
+        translationText.textContent =
+          translated;
 
       } catch (error) {
 
-        translationContent.innerHTML = `
-          <span class="translation-label">
-            KOREAN TRANSLATION
-          </span>
+        console.error(
+          "번역 오류:",
+          error
+        );
 
-          <span class="translation-text translation-error">
-            해석을 불러오지 못했습니다. 인터넷 연결을 확인해 주세요.
-          </span>
-        `;
+        translationText.innerHTML =
+          `<span class="translation-error">
+            ⚠️ 해석을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
+          </span>`;
 
       }
 
     }
-
 
     /* ==============================
        문제 렌더링
@@ -1179,24 +1131,18 @@
       const tokens =
         getWordTokens(sourceText);
 
-
       const blankIndices =
         chooseBlankIndices(
           tokens,
           selectedLevel
         );
 
-
       currentAnswers = [];
-
 
       const fragment =
         document.createDocumentFragment();
 
-
       tokens.forEach(token => {
-
-        /* 빈칸이 아니면 원문 그대로 */
 
         if (
           !blankIndices.has(
@@ -1214,10 +1160,8 @@
 
         }
 
-
         const answerIndex =
           currentAnswers.length;
-
 
         currentAnswers.push({
           answer: token.value,
@@ -1228,9 +1172,6 @@
             )
         });
 
-
-        /* wrapper */
-
         const wrapper =
           document.createElement(
             "span"
@@ -1238,9 +1179,6 @@
 
         wrapper.className =
           "blank-wrapper";
-
-
-        /* 정답 tooltip */
 
         const tooltip =
           document.createElement(
@@ -1252,9 +1190,6 @@
 
         tooltip.textContent =
           token.value;
-
-
-        /* input */
 
         const input =
           document.createElement(
@@ -1283,10 +1218,8 @@
         input.dataset.answerIndex =
           String(answerIndex);
 
-
         const answerLength =
           [...token.value].length;
-
 
         input.style.width =
           `${Math.min(
@@ -1298,9 +1231,6 @@
               ? 16
               : 13
           )}ch`;
-
-
-        /* 정답 버튼 */
 
         const peekBtn =
           document.createElement(
@@ -1319,19 +1249,16 @@
         peekBtn.title =
           "정답 확인";
 
-
         peekBtn.addEventListener(
           "click",
           e => {
 
             e.stopPropagation();
 
-
             const isShowing =
               tooltip.classList.contains(
                 "is-show"
               );
-
 
             document
               .querySelectorAll(
@@ -1344,7 +1271,6 @@
                   )
               );
 
-
             if (!isShowing) {
 
               tooltip.classList.add(
@@ -1355,9 +1281,6 @@
 
           }
         );
-
-
-        /* 입력 */
 
         input.addEventListener(
           "input",
@@ -1376,9 +1299,6 @@
 
           }
         );
-
-
-        /* Enter */
 
         input.addEventListener(
           "keydown",
@@ -1404,7 +1324,6 @@
           }
         );
 
-
         wrapper.appendChild(
           tooltip
         );
@@ -1423,11 +1342,9 @@
 
       });
 
-
       quizContent.replaceChildren(
         fragment
       );
-
 
       document.getElementById(
         "quiz-title"
@@ -1436,7 +1353,6 @@
           ? "국어 빈칸 채우기 연습"
           : "영어 빈칸 채우기 연습";
 
-
       document.getElementById(
         "quiz-help"
       ).textContent =
@@ -1444,13 +1360,10 @@
           ? "빈칸에 알맞은 말이나 어절을 입력하세요. (💡 버튼으로 개별 정답 확인 가능)"
           : "빈칸에 알맞은 단어를 입력하세요. (💡 버튼으로 개별 정답 확인 가능)";
 
-
       progressPill.textContent =
         `빈칸 ${currentAnswers.length}개`;
 
-
       resultMessage.textContent = "";
-
 
       quizView.classList.remove(
         "hidden-view"
@@ -1464,34 +1377,33 @@
         "hidden-view"
       );
 
-
-      /* 영어일 때 한글 해석 표시 */
-
+      /*
+       * 영어일 때만 자동 번역
+       */
       if (selectedLanguage === "en") {
 
-        translateEnglishToKorean(
+        translateToKorean(
           sourceText
         );
 
       } else {
 
-        translationContent.innerHTML = "";
+        translationBox.classList.add(
+          "hidden-view"
+        );
 
       }
-
 
       const firstBlank =
         quizContent.querySelector(
           ".blank-input"
         );
 
-
       if (firstBlank) {
         firstBlank.focus();
       }
 
     }
-
 
     /* ==============================
        문제 생성
@@ -1501,7 +1413,6 @@
 
       const enteredText =
         sourceInput.value.trim();
-
 
       const wordCount =
         selectedLanguage === "ko"
@@ -1516,7 +1427,6 @@
               ) || []
             ).length;
 
-
       if (!enteredText) {
 
         inputMessage.textContent =
@@ -1529,7 +1439,6 @@
         return;
 
       }
-
 
       if (wordCount < 3) {
 
@@ -1544,18 +1453,15 @@
 
       }
 
-
       sourceText =
         enteredText;
 
       inputMessage.textContent =
         "";
 
-
       renderQuiz();
 
     }
-
 
     /* ==============================
        언어 선택
@@ -1568,7 +1474,6 @@
       selectedLanguage =
         language;
 
-
       const enButton =
         document.getElementById(
           "language-en"
@@ -1578,7 +1483,6 @@
         document.getElementById(
           "language-ko"
         );
-
 
       enButton.classList.toggle(
         "is-active",
@@ -1590,52 +1494,37 @@
         language === "ko"
       );
 
-
       const isKorean =
         language === "ko";
-
 
       sourceTitle.textContent =
         isKorean
           ? "1. 국어 본문 입력"
           : "1. 영어 본문 입력";
 
-
       sourceHelp.textContent =
         isKorean
           ? "국어 지문을 복사한 다음 아래 상자에 붙여넣어 주세요."
           : "영어 지문을 복사한 다음 아래 상자에 붙여넣어 주세요.";
-
 
       sourceLabel.textContent =
         isKorean
           ? "국어 본문 입력"
           : "영어 본문 입력";
 
-
       sourceInput.placeholder =
         isKorean
           ? "여기에 국어 본문을 입력하세요..."
           : "여기에 영어 본문을 입력하세요...";
 
-
       sourceInput.spellcheck =
         !isKorean;
-
-
-      /* 국어 선택 시 해석 영역 제거 */
-
-      if (isKorean) {
-        translationContent.innerHTML = "";
-      }
-
 
       if (sourceText) {
         renderQuiz();
       }
 
     }
-
 
     /* ==============================
        난이도 선택
@@ -1648,7 +1537,6 @@
       selectedLevel =
         level;
 
-
       [0, 1, 2, 3].forEach(
         item => {
 
@@ -1657,10 +1545,8 @@
               `level-${item}`
             );
 
-
           const isActive =
             item === level;
-
 
           button.classList.toggle(
             "is-active",
@@ -1670,17 +1556,14 @@
         }
       );
 
-
       levelStatus.textContent =
         `${level}단계 선택됨`;
-
 
       if (sourceText) {
         renderQuiz();
       }
 
     }
-
 
     /* ==============================
        전체 정답 확인
@@ -1695,11 +1578,9 @@
           )
         ];
 
-
       if (!inputs.length) {
         return;
       }
-
 
       inputs.forEach(
         input =>
@@ -1709,9 +1590,7 @@
           )
       );
 
-
       updateResultMessage();
-
 
       const firstWrong =
         inputs.find(
@@ -1721,13 +1600,11 @@
             )
         );
 
-
       if (firstWrong) {
         firstWrong.focus();
       }
 
     }
-
 
     /* ==============================
        바깥 클릭 → tooltip 닫기
@@ -1759,7 +1636,6 @@
       }
     );
 
-
     /* ==============================
        이벤트
     ============================== */
@@ -1774,7 +1650,6 @@
           selectLanguage("en")
       );
 
-
     document
       .getElementById(
         "language-ko"
@@ -1785,7 +1660,6 @@
           selectLanguage("ko")
       );
 
-
     document
       .getElementById(
         "generate-button"
@@ -1795,7 +1669,6 @@
         generateQuiz
       );
 
-
     document
       .getElementById(
         "check-button"
@@ -1804,7 +1677,6 @@
         "click",
         checkAnswers
       );
-
 
     document
       .getElementById(
@@ -1820,7 +1692,6 @@
 
         }
       );
-
 
     [0, 1, 2, 3].forEach(
       level => {
@@ -1838,7 +1709,6 @@
       }
     );
 
-
     sourceInput.addEventListener(
       "input",
       () => {
@@ -1849,7 +1719,6 @@
       }
     );
 
-
     /* ==============================
        시작
     ============================== */
@@ -1859,7 +1728,6 @@
       () => {
 
         selectLanguage("en");
-
 
         if (window.lucide) {
           lucide.createIcons();
